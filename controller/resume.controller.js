@@ -7,7 +7,7 @@ var multer = require("multer");
 const pdfParse = require("pdf-parse");
 
 const configuration = new Configuration({
-  apiKey: "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",
+  apiKey: process.env.API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
