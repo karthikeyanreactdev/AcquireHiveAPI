@@ -26,6 +26,7 @@ app.use(bodyParser.json());
 require("./routes/openAI.route")(app);
 require("./routes/jobs.route")(app);
 require("./routes/resume.route")(app);
+require("./routes/candidate.route")(app);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
