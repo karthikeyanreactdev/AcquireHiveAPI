@@ -1,7 +1,7 @@
 const jobsModel = require("../model/jobs.model");
 // const PDFExtract = require("pdf.js-extract").PDFExtract;
 const { Configuration, OpenAIApi } = require("openai");
-
+const fs = require("fs");
 const pdfjs = require("pdfjs-dist/legacy/build/pdf");
 var multer = require("multer");
 const pdfParse = require("pdf-parse");
@@ -13,7 +13,13 @@ const openai = new OpenAIApi(configuration);
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "D://AcquireHive//AcquireHiveAPI");
+    var fs = require("fs");
+    var dir = "./tmp";
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+    cb(null, dir); //"D://AcquireHive//AcquireHiveAPI");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
@@ -63,10 +69,10 @@ exports.getResumeContent = async (req, res) => {
           startIndex += chunk.length;
         }
         var query = ` try to get name, contact info, skills, total year of experiance in numbers, i need response in  in JSON  format
-        must include all fileds in response from these text
+        must include all fileds in response from above text
         {
-        "fullName": "",
-        "mobile": ",
+        "fullName":"",
+        "mobile":"",
         "email": "",
         "skills": [],
         "total_years_of_experiance":"",   
@@ -82,7 +88,7 @@ exports.getResumeContent = async (req, res) => {
             model: "text-davinci-003",
             //  engine: "davinci-codex",
             prompt: prom,
-            temperature: 0.7,
+            temperature: 0.4,
             max_tokens: 1000,
             // request_id: "4fc313c8-d5ce-11ed-afa1-0242ac120002",
             top_p: 1,
@@ -106,8 +112,10 @@ exports.getResumeContent = async (req, res) => {
           model: "text-davinci-003",
           //  engine: "davinci-codex",
           prompt:
-            completions + query + "avoid duplicate and give me single JSON",
-          temperature: 0.7,
+            completions +
+            query +
+            "avoid duplicate and give me single JSON schema",
+          temperature: 0.6,
           max_tokens: 1000,
           top_p: 1,
           frequency_penalty: 0,
@@ -116,6 +124,7 @@ exports.getResumeContent = async (req, res) => {
           // sessionId: conversationId,
           // stream: conversationId ? conversationId : false,
         });
+
         res.status(200).send({
           data: JSON.parse(
             response.data?.choices[0]?.text.replaceAll("\n", "")

@@ -26,5 +26,6 @@ module.exports = (app) => {
 
   const candidateCntrooller = require("../controller/candidate.controller");
 
-  app.post("/get_candidates", candidateCntrooller.getCandidates);
+  app.get("/get_candidates", candidateCntrooller.getCandidates);
+  app.post("/process_candidates", candidateCntrooller.processCandidate);
 };

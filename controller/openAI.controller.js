@@ -39,8 +39,8 @@ exports.openAIJobPosting = async (req, res) => {
     console.error(err.message);
     res.status(422).send({
       status: false,
-      data: [],
-      message: "Failed.",
+      // data: [],
+      message: err.message,
     });
   }
 };

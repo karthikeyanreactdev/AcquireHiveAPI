@@ -4,36 +4,49 @@ exports.getAllCandidates = async () => {
   const allCandidates = await pool.query("SELECT * FROM candidates");
   return allCandidates.rows;
 };
+exports.getCandidateDetails = async (email) => {
+  const candidate = await pool.query(
+    "SELECT * FROM candidates WHERE email=$1",
+    [email]
+  );
+  return candidate.rows;
+};
 
-exports.client_creation = async (client) => {
-  const clientdata = await pool.query(
-    "INSERT INTO Clients (clientname,email,address1,address2,phonenumber,faxnumber,depositedamount,isactive,isdeleted,createdby,modifiedby,companyimageurl, zipcode,statee,city,transactionid, createddatetime,qbcustomerid,clientid,rechargeamount,minimumbalance) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21) RETURNING *",
+exports.addCandidate = async (userData) => {
+  const user = await pool.query(
+    "INSERT INTO candidates (full_name,mobile,email,score,status,skills,total_experiance,relavant_experiance,attempts,job_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *",
     [
-      client.clientname,
-      client.email,
-      client.address,
-      client.address1,
-      client.phoneNumber,
-      client.faxNumber,
-      client.depositedAmount,
-      client.isActive,
-      client.isDeleted,
-      client.createdBy,
-      client.modifiedBy,
-      client.companyImageURL,
-      client.zipcode,
-      client.state,
-      client.city,
-      client.transactionid,
-      client.createdDateTime,
-      client.qbcustomerid,
-      client.clientid,
-      client.rechargeamount,
-      client.minimumbalance,
+      userData.fullName,
+      userData.mobile,
+      userData.email,
+      userData.score,
+      userData.status,
+      userData.skills,
+      userData.total_years_of_experiance,
+      userData.relavant_experiance,
+      "0",
+      userData.job_id,
     ]
   );
-  if (clientdata.rows.length) {
-    const trans = await transaction_route.transaction_creation(client);
-  }
-  return clientdata.rows;
+
+  return user.rows;
+};
+exports.updateCandidate = async (userData) => {
+  const user = await pool.query(
+    "UPDATE candidates SET full_name =$1,mobile=$2,score=$4,status=$5,skills=$6,total_experiance=$7,relavant_experiance=$8,attempts=$9,job_id=$10  WHERE email=$3",
+    [
+      userData.fullName,
+      userData.mobile,
+      userData.email,
+      userData.score,
+      userData.status,
+      userData.skills,
+      userData.total_years_of_experiance,
+      userData.relavant_experiance,
+      "1",
+      userData.job_id,
+    ]
+  );
+
+  return user.rows;
 };
