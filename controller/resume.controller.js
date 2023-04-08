@@ -13,7 +13,6 @@ const openai = new OpenAIApi(configuration);
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    var fs = require("fs");
     var dir = "./tmp";
 
     if (!fs.existsSync(dir)) {
