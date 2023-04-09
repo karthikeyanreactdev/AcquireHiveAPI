@@ -10,15 +10,18 @@ const configuration = new Configuration({
   apiKey: process.env.API_KEY,
 });
 const openai = new OpenAIApi(configuration);
-
+var dir = null;
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     var dir = "./tmp";
+    console.log("1", fs.existsSync(dir));
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
+      console.log("2", fs.existsSync(dir));
     }
-    cb(null, dir); //"D://AcquireHive//AcquireHiveAPI");
+    cb(null, "//tmp");
+    // cb(null, "D://AcquireHive//AcquireHiveAPI"); //dir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
