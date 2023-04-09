@@ -20,7 +20,7 @@ var storage = multer.diskStorage({
       fs.mkdirSync(dir);
       console.log("2", fs.existsSync(dir));
     }
-    cb(null, "//tmp");
+    cb(null, "/tmp");
     // cb(null, "D://AcquireHive//AcquireHiveAPI"); //dir);
   },
   filename: function (req, file, cb) {
