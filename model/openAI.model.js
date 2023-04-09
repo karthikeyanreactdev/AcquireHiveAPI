@@ -64,19 +64,19 @@ exports.getInterViewQuestions = async (id, relavant_experiance, job_id) => {
 question:"",
 options: [
 {
-  "id":0,
+  "id":"a",
   "answer":""
 },
 {
-  "id":1,
+  "id":"b",
   "answer":""
 },
 {
-  "id":2,
+  "id":"c",
   "answer":""
 },
 {
-  "id":3,
+  "id":"d",
   "answer":""
 }
 ],
