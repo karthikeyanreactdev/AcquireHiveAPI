@@ -58,7 +58,7 @@ exports.getResumeContent = async (req, res) => {
 
           // result.text.match(/.{1,3000}/g) ||
           // []
-          .replaceAll("\n", "")
+          // .replaceAll("\n", "")
           .replace(/[^a-zA-Z0-9 ]/g, "")
           .replace(/\s\s+/g, " ")
           .replace(/  +/g, " ");
