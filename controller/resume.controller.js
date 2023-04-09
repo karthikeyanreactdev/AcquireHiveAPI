@@ -1,10 +1,16 @@
 const jobsModel = require("../model/jobs.model");
 // const PDFExtract = require("pdf.js-extract").PDFExtract;
 const { Configuration, OpenAIApi } = require("openai");
+// const fs = require("fs");
 const fs = require("fs");
+const { createCanvas } = require("canvas");
+const pdfjsLib = require("pdfjs-dist");
 const pdfjs = require("pdfjs-dist/legacy/build/pdf");
+// const pdfjs = require("pdfjs-dist/legacy/build/pdf");
 var multer = require("multer");
 const pdfParse = require("pdf-parse");
+const ReadText = require("text-from-image");
+const fmt2json = require("format-to-json");
 
 const configuration = new Configuration({
   apiKey: process.env.API_KEY,
@@ -46,13 +52,33 @@ exports.getResumeContent = async (req, res) => {
     }
     file = req.file;
     try {
-      var result = await pdfParse(dir + "/" + fileName);
+      //var result = await pdfParse(dir + "/" + fileName);
+      const data = new Uint8Array(fs.readFileSync(dir + "/" + fileName));
+      const pdfDoc = await pdfjsLib.getDocument({ data }).promise;
+
+      // Convert each page to image base64
+      const imgDataList = [];
+      for (let i = 1; i <= pdfDoc.numPages; i++) {
+        const page = await pdfDoc.getPage(i);
+        const viewport = page.getViewport({ scale: 1.3 });
+        const canvas = createCanvas(viewport.width, viewport.height);
+        const context = canvas.getContext("2d");
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+
+        await page.render(renderContext).promise;
+        const imgDataUrl = canvas.toDataURL("image/png");
+        const imgData = imgDataUrl.replace(/^data:image\/png;base64,/, "");
+        imgDataList.push({ imgData: imgData, imgDataUrl: imgDataUrl });
+      }
+      var result = await ReadText(imgDataList[0].imgDataUrl);
       if (result) {
-        var pdfData = result.text
-          .replaceAll("\n", "")
-          .replace(/[^a-zA-Z0-9 ]/g, "")
-          .replace(/\s\s+/g, " ")
-          .replace(/  +/g, " ");
+        var pdfData = result.replaceAll("\n", " ");
+        // .replace(/[^a-zA-Z0-9 ]/g, "")
+        // .replace(/\s\s+/g, " ")
+        // .replace(/  +/g, " ");
         console.log(pdfData.length);
 
         let chunks = [];
@@ -66,7 +92,7 @@ exports.getResumeContent = async (req, res) => {
           startIndex += chunk.length;
         }
         var query = ` try to get name, contact info, skills, total year of experiance in numbers, i need response in  in JSON  format
-        must include all fileds in response from above text
+        must include all fileds in response from this text
         {
         "fullName":"",
         "mobile":"",
@@ -83,15 +109,13 @@ exports.getResumeContent = async (req, res) => {
           let response = await openai.createCompletion({
             model: "text-davinci-003",
             prompt: prom,
-            temperature: 0.4,
+            temperature: 0.5,
             max_tokens: 1000,
             top_p: 1,
             frequency_penalty: 0,
             presence_penalty: 0,
           });
-          if (conversationId === "") {
-            conversationId = response.data?.id;
-          }
+
           if (response.data?.choices[0]?.text !== "") {
             completions.push(
               response.data?.choices[0]?.text.replaceAll("\n", "")
@@ -110,10 +134,13 @@ exports.getResumeContent = async (req, res) => {
           frequency_penalty: 0,
           presence_penalty: 0,
         });
-
+        const data = fmt2json(
+          response.data?.choices[0]?.text.replaceAll("\n", ""),
+          { withDetails: true }
+        );
         res.status(200).send({
           data: JSON.parse(
-            response.data?.choices[0]?.text.replaceAll("\n", "")
+            data.result.replaceAll("\n", "").replaceAll("\r", "")
           ),
           message: "Resume proccessed successfully.",
         });

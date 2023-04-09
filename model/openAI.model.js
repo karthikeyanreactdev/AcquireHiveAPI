@@ -102,7 +102,10 @@ options: [
       // var jobPostingData = JSON.parse(
       //   responseData.data?.choices[0]?.text.replaceAll("\n", "")
       // );
-      return jobPostingData.result.replaceAll("\n", "");
+      // const parsedData = JSON.parse(jobPostingData.result.replaceAll("\n", ""));
+      return JSON.parse(
+        jobPostingData.result.replaceAll("\n", "").replaceAll("\r", "")
+      );
     } catch (e) {
       return e;
     }

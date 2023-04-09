@@ -13,6 +13,7 @@
     "@hapi/boom": "^10.0.1",
     "aws-sdk": "^2.1353.0",
     "body-parser": "^1.20.2",
+    "canvas": "^2.11.2",
     "celebrate": "^15.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
@@ -34,9 +35,10 @@
     "path": "^0.12.7",
     "pdf-parse": "^1.1.1",
     "pdf.js-extract": "^0.2.1",
-    "pdfjs-dist": "^3.5.141",
+    "pdfjs-dist": "^3.4.120",
     "pg": "^8.10.0",
     "pg-promise": "^11.4.3",
-    "sib-api-v3-sdk": "^8.5.0"
+    "sib-api-v3-sdk": "^8.5.0",
+    "text-from-image": "^1.1.1"
   }
 }
