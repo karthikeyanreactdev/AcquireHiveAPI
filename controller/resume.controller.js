@@ -12,6 +12,8 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 var dir = null;
 var fileName = "";
+
+//handle file i.e store in local and then read
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     dir = "./tmp";
@@ -21,19 +23,19 @@ var storage = multer.diskStorage({
       fs.mkdirSync(dir);
       console.log("2", fs.existsSync(dir));
     }
-    cb(null, "./tmp");
-    // cb(null, "D://AcquireHive//AcquireHiveAPI"); //dir);
+    cb(null, dir);
   },
   filename: function (req, file, cb) {
     fileName = Date.now() + "-" + file.originalname;
     cb(null, fileName);
   },
 });
-
+//get a file using key
 var upload = multer({
   storage: storage,
 }).single("file");
 
+// getting resume raw data and process with open ai and give valid json data
 exports.getResumeContent = async (req, res) => {
   var file = "";
   upload(req, res, async function (err) {
@@ -44,24 +46,15 @@ exports.getResumeContent = async (req, res) => {
     }
     file = req.file;
     try {
-      // const pdfExtract = new PDFExtract();
-      // const options = {
-      //   disableCombineTextItems: true,
-      //   verbosity: 100,
-      //   normalizeWhitespace: true,
-      // }; /* see below */
-      // var d = "";
       var result = await pdfParse(dir + "/" + fileName);
       if (result) {
         var pdfData = result.text
-
-          // result.text.match(/.{1,3000}/g) ||
-          // []
           .replaceAll("\n", "")
           .replace(/[^a-zA-Z0-9 ]/g, "")
           .replace(/\s\s+/g, " ")
           .replace(/  +/g, " ");
         console.log(pdfData.length);
+
         let chunks = [];
         let startIndex = 0;
         const MAX_TOKENS = 3000;
@@ -79,10 +72,9 @@ exports.getResumeContent = async (req, res) => {
         "mobile":"",
         "email": "",
         "skills": [],
-        "total_years_of_experiance":"",   
-           
+        "total_years_of_experiance":"",           
         }`;
-        // chunks.push(query);
+
         let completions = [];
 
         // Send each chunk to the API and save the generated completion
@@ -90,17 +82,12 @@ exports.getResumeContent = async (req, res) => {
           const prom = chunks[i] + query;
           let response = await openai.createCompletion({
             model: "text-davinci-003",
-            //  engine: "davinci-codex",
             prompt: prom,
             temperature: 0.4,
             max_tokens: 1000,
-            // request_id: "4fc313c8-d5ce-11ed-afa1-0242ac120002",
             top_p: 1,
             frequency_penalty: 0,
             presence_penalty: 0,
-            // stream: true,
-            // sessionId: conversationId,
-            // stream: conversationId ? conversationId : false,
           });
           if (conversationId === "") {
             conversationId = response.data?.id;
@@ -108,13 +95,11 @@ exports.getResumeContent = async (req, res) => {
           if (response.data?.choices[0]?.text !== "") {
             completions.push(
               response.data?.choices[0]?.text.replaceAll("\n", "")
-              // JSON.parse(response.data?.choices[0]?.text.replaceAll("\n", ""))
             );
           }
         }
         let response = await openai.createCompletion({
           model: "text-davinci-003",
-          //  engine: "davinci-codex",
           prompt:
             completions +
             query +
@@ -124,9 +109,6 @@ exports.getResumeContent = async (req, res) => {
           top_p: 1,
           frequency_penalty: 0,
           presence_penalty: 0,
-          // stream: true,
-          // sessionId: conversationId,
-          // stream: conversationId ? conversationId : false,
         });
 
         res.status(200).send({
@@ -138,7 +120,6 @@ exports.getResumeContent = async (req, res) => {
       }
     } catch (err) {
       res.status(400).send({
-        status: true,
         message: err.message,
       });
     }

@@ -8,6 +8,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+// open ai create job posting based employer input
 exports.getJobPostingFormat = async (jobDescriptionPrompt) => {
   const responseData = await openai.createCompletion({
     model: "text-davinci-003",
@@ -19,11 +20,6 @@ exports.getJobPostingFormat = async (jobDescriptionPrompt) => {
     presence_penalty: 0,
   });
   try {
-    console.log(
-      "check 1",
-      responseData.data?.choices[0]?.text.replaceAll("\n", "")
-    );
-
     var jobPostingData = JSON.parse(
       responseData.data?.choices[0]?.text.replaceAll("\n", "")
     );
@@ -51,7 +47,6 @@ exports.getJobPostingFormat = async (jobDescriptionPrompt) => {
 // get interview questions for the candidate based on skill and relavant experiance
 exports.getInterViewQuestions = async (id, relavant_experiance, job_id) => {
   const jobDetails = await jobsModel.getJobDetails(job_id);
-  // console.log(jobDetails);
   let level = "fresher";
   if (relavant_experiance >= 1 && relavant_experiance <= 2) {
     level = "beginner";
@@ -105,5 +100,24 @@ answer: id
     } catch (e) {
       return e;
     }
+  }
+};
+
+// open ai create mail content for candidates
+exports.createMailContent = async (content) => {
+  try {
+    const responseData = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: content.replaceAll("\n", ""),
+      temperature: 0.7,
+      max_tokens: 4000,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    });
+    return responseData.data?.choices[0]?.text;
+  } catch (err) {
+    // console.error(err.message);
+    return false;
   }
 };

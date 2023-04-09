@@ -1,9 +1,11 @@
 const pool = require("../db");
 
+//get all enrolled candidates
 exports.getAllCandidates = async () => {
   const allCandidates = await pool.query("SELECT * FROM candidates");
   return allCandidates.rows;
 };
+//get enrolled candidate based on id
 exports.getCandidateDetails = async (email) => {
   const candidate = await pool.query(
     "SELECT * FROM candidates WHERE email=$1",
@@ -11,7 +13,7 @@ exports.getCandidateDetails = async (email) => {
   );
   return candidate.rows;
 };
-
+//add a candidate
 exports.addCandidate = async (userData) => {
   const user = await pool.query(
     "INSERT INTO candidates (full_name,mobile,email,score,status,skills,total_experiance,relavant_experiance,attempts,job_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *",
@@ -31,6 +33,7 @@ exports.addCandidate = async (userData) => {
 
   return user.rows;
 };
+//update a candidate
 exports.updateCandidate = async (userData) => {
   const user = await pool.query(
     "UPDATE candidates SET full_name =$1,mobile=$2,score=$4,status=$5,skills=$6,total_experiance=$7,relavant_experiance=$8,attempts=$9,job_id=$10  WHERE email=$3",

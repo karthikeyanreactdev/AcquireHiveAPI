@@ -1,5 +1,6 @@
 const openAIModel = require("../model/openAI.model");
 
+// open ai create job posting based employer input
 exports.openAIJobPosting = async (req, res) => {
   try {
     const { jobDescription } = req.body;
@@ -23,14 +24,12 @@ exports.openAIJobPosting = async (req, res) => {
       );
 
       res.status(200).send({
-        status: true,
         data: jobPostingResponse,
         //   data: dashboardvalues,
         message: "Job Posted Successfully.",
       });
     } else {
       res.status(500).send({
-        status: false,
         data: [],
         message: "Please fill Job Description.",
       });
@@ -38,7 +37,6 @@ exports.openAIJobPosting = async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(422).send({
-      status: false,
       // data: [],
       message: err.message,
     });

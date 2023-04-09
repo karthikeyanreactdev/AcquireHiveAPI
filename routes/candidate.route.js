@@ -28,4 +28,5 @@ module.exports = (app) => {
 
   app.get("/get_candidates", candidateCntrooller.getCandidates);
   app.post("/process_candidates", candidateCntrooller.processCandidate);
+  app.post("/sendEmail", candidateCntrooller.sendStatusMail);
 };
