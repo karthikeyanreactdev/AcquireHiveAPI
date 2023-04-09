@@ -59,7 +59,7 @@ exports.getInterViewQuestions = async (id, relavant_experiance, job_id) => {
     level = "expert";
   }
   if (jobDetails?.length) {
-    const questionsPrompt = `give me 10 questions ${jobDetails[0].skills} ${level} level difficult questions with options and answer in JSON format
+    const questionsPrompt = `give me 10 questions ${jobDetails[0].skills} ${level} level difficult questions with options and answer in Best JSON format  that can JSON.parse easily
 [{
 question:"",
 options: [
@@ -87,7 +87,7 @@ options: [
     const responseData = await openai.createCompletion({
       model: "text-davinci-003",
       prompt: questionsPrompt.replaceAll("\n", ""),
-      temperature: 0.5,
+      temperature: 0.7,
       max_tokens: 4000,
       top_p: 1,
       frequency_penalty: 0,
