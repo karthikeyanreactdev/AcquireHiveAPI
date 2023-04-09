@@ -52,35 +52,17 @@ exports.getResumeContent = async (req, res) => {
     }
     file = req.file;
     try {
-      //var result = await pdfParse(dir + "/" + fileName);
-      const data = new Uint8Array(fs.readFileSync(dir + "/" + fileName));
-      const pdfDoc = await pdfjsLib.getDocument({ data }).promise;
-
-      // Convert each page to image base64
-      const imgDataList = [];
-      for (let i = 1; i <= pdfDoc.numPages; i++) {
-        const page = await pdfDoc.getPage(i);
-        const viewport = page.getViewport({ scale: 1.3 });
-        const canvas = createCanvas(viewport.width, viewport.height);
-        const context = canvas.getContext("2d");
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-        };
-
-        await page.render(renderContext).promise;
-        const imgDataUrl = canvas.toDataURL("image/png");
-        const imgData = imgDataUrl.replace(/^data:image\/png;base64,/, "");
-        imgDataList.push({ imgData: imgData, imgDataUrl: imgDataUrl });
-      }
-      var result = await ReadText(imgDataList[0].imgDataUrl);
+      var result = await pdfParse(dir + "/" + fileName);
       if (result) {
-        var pdfData = result.replaceAll("\n", " ");
-        // .replace(/[^a-zA-Z0-9 ]/g, "")
-        // .replace(/\s\s+/g, " ")
-        // .replace(/  +/g, " ");
-        console.log(pdfData.length);
+        var pdfData = result.text
 
+          // result.text.match(/.{1,3000}/g) ||
+          // []
+          .replaceAll("\n", "")
+          .replace(/[^a-zA-Z0-9 ]/g, "")
+          .replace(/\s\s+/g, " ")
+          .replace(/  +/g, " ");
+        console.log(pdfData.length);
         let chunks = [];
         let startIndex = 0;
         const MAX_TOKENS = 3000;
@@ -92,15 +74,16 @@ exports.getResumeContent = async (req, res) => {
           startIndex += chunk.length;
         }
         var query = ` try to get name, contact info, skills, total year of experiance in numbers, i need response in  in JSON  format
-        must include all fileds in response from this text
+        must include all fileds in response from above text
         {
         "fullName":"",
         "mobile":"",
         "email": "",
         "skills": [],
-        "total_years_of_experiance":"",           
+        "total_years_of_experiance":"",   
+           
         }`;
-
+        // chunks.push(query);
         let completions = [];
 
         // Send each chunk to the API and save the generated completion
@@ -108,22 +91,31 @@ exports.getResumeContent = async (req, res) => {
           const prom = chunks[i] + query;
           let response = await openai.createCompletion({
             model: "text-davinci-003",
+            //  engine: "davinci-codex",
             prompt: prom,
-            temperature: 0.5,
+            temperature: 0.4,
             max_tokens: 1000,
+            // request_id: "4fc313c8-d5ce-11ed-afa1-0242ac120002",
             top_p: 1,
             frequency_penalty: 0,
             presence_penalty: 0,
+            // stream: true,
+            // sessionId: conversationId,
+            // stream: conversationId ? conversationId : false,
           });
-
+          if (conversationId === "") {
+            conversationId = response.data?.id;
+          }
           if (response.data?.choices[0]?.text !== "") {
             completions.push(
               response.data?.choices[0]?.text.replaceAll("\n", "")
+              // JSON.parse(response.data?.choices[0]?.text.replaceAll("\n", ""))
             );
           }
         }
         let response = await openai.createCompletion({
           model: "text-davinci-003",
+          //  engine: "davinci-codex",
           prompt:
             completions +
             query +
@@ -133,14 +125,14 @@ exports.getResumeContent = async (req, res) => {
           top_p: 1,
           frequency_penalty: 0,
           presence_penalty: 0,
+          // stream: true,
+          // sessionId: conversationId,
+          // stream: conversationId ? conversationId : false,
         });
-        const data = fmt2json(
-          response.data?.choices[0]?.text.replaceAll("\n", ""),
-          { withDetails: true }
-        );
+
         res.status(200).send({
           data: JSON.parse(
-            data.result.replaceAll("\n", "").replaceAll("\r", "")
+            response.data?.choices[0]?.text.replaceAll("\n", "")
           ),
           message: "Resume proccessed successfully.",
         });
