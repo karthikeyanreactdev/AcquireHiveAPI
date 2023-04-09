@@ -11,20 +11,22 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 var dir = null;
+var fileName = "";
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    var dir = "./tmp";
+    dir = "./tmp";
     console.log("1", fs.existsSync(dir));
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
       console.log("2", fs.existsSync(dir));
     }
-    cb(null, "//AcquireHiveAPI//tmp");
+    cb(null, "./tmp");
     // cb(null, "D://AcquireHive//AcquireHiveAPI"); //dir);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
+    fileName = Date.now() + "-" + file.originalname;
+    cb(null, fileName);
   },
 });
 
@@ -49,7 +51,7 @@ exports.getResumeContent = async (req, res) => {
       //   normalizeWhitespace: true,
       // }; /* see below */
       // var d = "";
-      var result = await pdfParse(req.file.filename);
+      var result = await pdfParse(dir + "/" + fileName);
       if (result) {
         var pdfData = result.text
 
