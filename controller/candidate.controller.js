@@ -32,16 +32,16 @@ exports.processCandidate = async (req, res) => {
         candidateDetails.length &&
         candidateDetails[0]?.attempts === 0
       ) {
-        // const updateCandidateData = await candidateModel.updateCandidate(
-        //   req.body
-        // );
-        // if (updateCandidateData) {
-        questions = await openAIModel.getInterViewQuestions(
-          id,
-          relavant_experiance,
-          job_id
+        const updateCandidateData = await candidateModel.updateCandidate(
+          req.body
         );
-        // }
+        if (updateCandidateData) {
+          questions = await openAIModel.getInterViewQuestions(
+            id,
+            relavant_experiance,
+            job_id
+          );
+        }
       } else {
         const addCandidateData = await candidateModel.addCandidate(req.body);
         questions = await openAIModel.getInterViewQuestions(

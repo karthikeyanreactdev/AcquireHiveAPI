@@ -1,7 +1,7 @@
 const { Configuration, OpenAIApi } = require("openai");
 const pool = require("../db");
 const jobsModel = require("../model/jobs.model");
-
+const fmt2json = require("format-to-json");
 const openAIController = require("../controller/openAI.controller");
 const configuration = new Configuration({
   apiKey: process.env.API_KEY,
@@ -47,6 +47,7 @@ exports.getJobPostingFormat = async (jobDescriptionPrompt) => {
 // get interview questions for the candidate based on skill and relavant experiance
 exports.getInterViewQuestions = async (id, relavant_experiance, job_id) => {
   const jobDetails = await jobsModel.getJobDetails(job_id);
+  console.log(jobDetails);
   let level = "fresher";
   if (relavant_experiance >= 1 && relavant_experiance <= 2) {
     level = "beginner";
@@ -54,49 +55,54 @@ exports.getInterViewQuestions = async (id, relavant_experiance, job_id) => {
     level = "intermediate";
   } else if (relavant_experiance <= 6) {
     level = "advanced";
-  } else if (relavant_experiance <= 8) {
+  } else if (relavant_experiance >= 6) {
     level = "expert";
   }
   if (jobDetails?.length) {
     const questionsPrompt = `give me 10 questions ${jobDetails[0].skills} ${level} level difficult questions with options and answer in JSON format
 [{
-question:,
+question:"",
 options: [
 {
   "id":0,
-  "answer":
+  "answer":""
 },
 {
   "id":1,
-  "answer":
+  "answer":""
 },
 {
   "id":2,
-  "answer":
+  "answer":""
 },
 {
   "id":3,
-  "answer":
+  "answer":""
 }
 ],
-answer: id
+"answer": "id"
 }
 ]`;
 
     const responseData = await openai.createCompletion({
       model: "text-davinci-003",
       prompt: questionsPrompt.replaceAll("\n", ""),
-      temperature: 0.6,
+      temperature: 0.5,
       max_tokens: 4000,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
     });
     try {
-      var jobPostingData = JSON.parse(
-        responseData.data?.choices[0]?.text.replaceAll("\n", "")
+      console.log(responseData.data?.choices[0]?.text.replaceAll("\n", ""));
+      const jobPostingData = fmt2json(
+        responseData.data?.choices[0]?.text.replaceAll("\n", ""),
+        { withDetails: true }
       );
-      return jobPostingData;
+      // var jobPostingData = JSON.parse(
+      //   responseData.data?.choices[0]?.text.replaceAll("\n", "")
+      // );
+      return jobPostingData.result.replaceAll("\n", "");
     } catch (e) {
       return e;
     }
