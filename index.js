@@ -1,11 +1,14 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const morgan = require("morgan");
+
 // const cors = require("cors")({ origin: true });
 const app = express();
 const bodyParser = require("body-parser");
 // const pool = require("./db");
 const originWhitelist = [
+  "*",
   "http://localhost:3000",
   "https://dev.d2fp1mggaiv640.amplifyapp.com/",
   "https://dev.d2fp1mggaiv640.amplifyapp.com",
