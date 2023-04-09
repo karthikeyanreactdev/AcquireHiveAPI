@@ -71,6 +71,7 @@ exports.processCandidate = async (req, res) => {
 exports.sendStatusMail = async (req, res) => {
   const { fullName, email, status } = req.body;
   let subjectContent = "";
+  let promptContent = "";
   if (status === "next_level") {
     subjectContent = "Second Level Interview Letter";
     promptContent = `generate Second Level Interview schedule Letter, Company name: Instrive Softlabs, Location: chennai, employee name: ${fullName}, Start date: 06th April 2023,designation: software developer, Thanks Ashok kannadasan, CEO - Cofounder`;

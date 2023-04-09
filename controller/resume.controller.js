@@ -73,8 +73,19 @@ exports.getResumeContent = async (req, res) => {
           chunks.push(chunk);
           startIndex += chunk.length;
         }
-        var query = ` try to get name, contact info, skills, total year of experiance in numbers, i need response in  in JSON  format
-        must include all fileds in response from above text
+        // var query = ` try to get name, contact info, skills, total year of experiance in numbers, i need response in  in JSON  format
+        // must include all fileds in response from above text
+        // {
+        // "fullName":"",
+        // "mobile":"",
+        // "email": "",
+        // "skills": [],
+        // "total_years_of_experiance":"",
+
+        // }`;
+        var query = `You are parserGPT. The ultimate resume parsing tool. For any given resume, you need to get name, mobile number, emaill address, skills in keywords, total years of experiance in years (months in decimal places), The output needs to be in JSON  format based on the structure below. Use NA if data for one more fields is not available.
+
+Reference JSON structure
         {
         "fullName":"",
         "mobile":"",
