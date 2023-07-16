@@ -28,4 +28,5 @@ module.exports = (app) => {
   const openAIController = require("../controller/openAI.controller");
 
   app.post("/create_job_post", openAIController.openAIJobPosting);
+  app.post("/generate", openAIController.generate);
 };

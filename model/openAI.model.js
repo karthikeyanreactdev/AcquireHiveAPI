@@ -130,3 +130,64 @@ exports.createMailContent = async (content) => {
     return false;
   }
 };
+
+// open ai create job posting based employer input
+exports.getJD = async (jobDescriptionPrompt, res) => {
+  const responseData = await openai.createCompletion(
+    {
+      model: "text-davinci-003",
+      stream: true,
+      prompt: jobDescriptionPrompt,
+      temperature: 0.3,
+      max_tokens: 2000,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    },
+
+    { responseType: "stream" }
+  );
+  // console.log("responseData", responseData.data?.choices[0]?.text);
+  try {
+    // var jobPostingData = JSON.parse(
+    //   responseData.data?.choices[0]?.text.replaceAll("\n", "")
+    // );
+    // console.log(jobPostingData);
+    responseData.then((resp) => {
+      resp.data.on("data", (chunk) => {
+        // console.log the buffer value
+        console.log("chunk: ", chunk);
+
+        // this converts the buffer to a string
+        const payloads = chunk.toString().split("\n\n");
+
+        console.log("payloads: ", payloads);
+
+        for (const payload of payloads) {
+          // if string includes '[DONE]'
+          if (payload.includes("[DONE]")) {
+            res.end(); // Close the connection and return
+            return;
+          }
+          if (payload.startsWith("data:")) {
+            // remove 'data: ' and parse the corresponding object
+            const data = JSON.parse(payload.replace("data: ", ""));
+            try {
+              const text = data.choices[0].delta?.content;
+              if (text) {
+                console.log("text: ", text);
+                // send value of text to the client
+                res.write(`${text}`);
+              }
+            } catch (error) {
+              console.log(`Error with JSON.parse and ${payload}.\n${error}`);
+            }
+          }
+        }
+      });
+    });
+    // return responseData.data?.choices[0]?.text;
+  } catch (e) {
+    return e;
+  }
+};
